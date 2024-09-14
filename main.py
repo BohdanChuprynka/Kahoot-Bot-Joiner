@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 
 # Customization
-script_type: str = "slower" # faster or slower
+script_type: str = "faster" # faster or slower
 is_continue: bool = False # Option for bots to choose answers 
 
 bot_limit: int = 100 # Stops execution of the code when bot_limit is reached (Safety Reasons)
@@ -56,7 +56,7 @@ def nickname_input(driver, url, game_code, name_suffix):
 
 
 chrome_options = Options()
-#chrome_options.add_argument("--headless") # Run without rendering Chrome
+chrome_options.add_argument("--headless") # Run without rendering Chrome
 driver = webdriver.Chrome(options=chrome_options)
 
 if script_type == "faster":
@@ -86,15 +86,29 @@ if not is_continue:
 
 
 if is_continue:
-#     TODO: add every bot to click preffered button 
-#     # Red, Blue, Yellow, Green
-#     button_xpaths = ["//*[@id="main-content"]/main/div[2]/div/div[2]/div/div/div[3]",
-#                       "//*[@id="main-content"]/main/div[2]/div/div[2]/div/div/div[2]",
-#                         "//*[@id="main-content"]/main/div[2]/div/div[2]/div/div/div[4]",
-#                           "//*[@id="main-content"]/main/div[2]/div/div[2]/div/div/div[1]"]
-#     driver.switch_to.window(driver.window_handles[-1])  # Switch to the latest tab
+    # Red, Blue, Yellow, Green
+    button_xpaths = ['/html/body/div[1]/div[1]/div/div/main/div[3]/form/div/div/div[1]/button[1]',
+                    '/html/body/div[1]/div[1]/div/div/main/div[3]/form/div/div/div[1]/button[2]',
+                    '/html/body/div[1]/div[1]/div/div/main/div[3]/form/div/div/div[2]/button[1]',
+                    '/html/body/div[1]/div[1]/div/div/main/div[3]/form/div/div/div[2]/button[2]']
 
-    pass
-else: 
-    driver.quit() 
+    print("Use following terms: 1: Red, 2: Blue, 3: Yellow, 4: Green, 0: Exit")
+    while True:
+        try:
+            button_id = int(input("Button to click: "))
 
+            if 0 < button_id < 5:
+                for i in range(JOIN_COUNT):
+                    driver.switch_to.window(driver.window_handles[i+1]) 
+
+                    locate_button = driver.find_element(by=By.XPATH, value=button_xpaths[button_id-1])
+                    locate_button.click()
+            elif button_id == 0:
+                driver.quit()
+                print("Run is finished.")
+                exit()
+            else: 
+                print("Invalid input. Try again.")
+                break
+        except Exception as e:
+            continue
