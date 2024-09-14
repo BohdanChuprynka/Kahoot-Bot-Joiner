@@ -1,5 +1,4 @@
 # Main script 
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys 
 from selenium.webdriver.common.by import By
@@ -10,11 +9,19 @@ from concurrent.futures import ThreadPoolExecutor
 
 import time
 
-# Constants
+# Customization
+script_type: str = "slower" # faster or slower
+is_continue: bool = False # Option for bots to choose answers 
+
+bot_limit: int = 100 # Stops execution of the code when bot_limit is reached (Safety Reasons)
+
+# Auto Constants
 KAHOOT_URL = "https://kahoot.it/"
 GAME_CODE = input("Enter game code: ")
 BASE_NAME = input("Enter desired name: ")
 JOIN_COUNT = int(input("Number of total bots: ")) 
+if bot_limit and JOIN_COUNT > bot_limit:
+    raise ValueError("Bot limit reached. Consider other options")
 
 def join_kahoot(driver, url, game_code, name_suffix):
     try: 
@@ -37,22 +44,57 @@ def join_kahoot(driver, url, game_code, name_suffix):
     except Exception as e:
        print(f"Unexpected error in thread {name_suffix}: {e} :()")
 
+def join_game(driver, game_code):
+      game_code_input = driver.find_element(by=By.XPATH, value='//*[@id="game-input"]')  # Adjust XPath if needed
+      game_code_input.send_keys(game_code)
+      game_code_input.send_keys(Keys.ENTER)
+
+def nickname_input(driver, url, game_code, name_suffix):
+      player_name_input = driver.find_element(by=By.XPATH, value='//*[@id="nickname"]') 
+      player_name_input.send_keys(f"{BASE_NAME}{name_suffix+1}")  
+      player_name_input.send_keys(Keys.ENTER)
+
 
 chrome_options = Options()
-chrome_options.add_argument("--headless") # Run without rendering Chrome
-
+#chrome_options.add_argument("--headless") # Run without rendering Chrome
 driver = webdriver.Chrome(options=chrome_options)
 
-for i in range(JOIN_COUNT):
-    driver.execute_script("window.open('');") 
-    driver.switch_to.window(driver.window_handles[-1])  # Switch to the latest tab
-    join_kahoot(driver, KAHOOT_URL, GAME_CODE, i+1)
+if script_type == "faster":
+    with ThreadPoolExecutor(max_workers=JOIN_COUNT) as executor:
+        for i in range(JOIN_COUNT):
+            driver.execute_script("window.open('');")  # Open a new tab
+            driver.switch_to.window(driver.window_handles[-1])  # Switch to the latest tab
+            driver.get(KAHOOT_URL)
 
-is_continue = bool(input("Continue for playing the game? (y/n): "))
+        for i in range(JOIN_COUNT):
+            driver.switch_to.window(driver.window_handles[i+1])
+            executor.submit(join_game, driver, GAME_CODE).result()
+        time.sleep(1) # For all pages to load 
+        for i in range(JOIN_COUNT):
+            driver.switch_to.window(driver.window_handles[i+1])
+            executor.submit(nickname_input, driver, KAHOOT_URL, GAME_CODE, i+1).result()
+elif script_type == "slower":
+    for i in range(JOIN_COUNT):
+        driver.execute_script("window.open('');") 
+        driver.switch_to.window(driver.window_handles[-1])  # Switch to the latest tab
+        join_kahoot(driver, KAHOOT_URL, GAME_CODE, i+1)
+else: 
+    raise ValueError("Invalid script type. Change 'script_type' variable to a proper one.")
+
+if not is_continue:
+    is_continue = bool(input("Continue for playing the game? (y/n): "))
+
 
 if is_continue:
-   # TODO: add every bot to click preffered button 
-   pass
+#     TODO: add every bot to click preffered button 
+#     # Red, Blue, Yellow, Green
+#     button_xpaths = ["//*[@id="main-content"]/main/div[2]/div/div[2]/div/div/div[3]",
+#                       "//*[@id="main-content"]/main/div[2]/div/div[2]/div/div/div[2]",
+#                         "//*[@id="main-content"]/main/div[2]/div/div[2]/div/div/div[4]",
+#                           "//*[@id="main-content"]/main/div[2]/div/div[2]/div/div/div[1]"]
+#     driver.switch_to.window(driver.window_handles[-1])  # Switch to the latest tab
+
+    pass
 else: 
     driver.quit() 
 
