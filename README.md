@@ -1,4 +1,4 @@
-*** Not working! ***
+# **Not working!**
 
 # Kahoot-Bot-Joiner
 A bot that floods a specified amount of bots to a Kahoot game. It was developed just for fun during Kahoot games. To avoid cheating there are no options for auto-answering.
