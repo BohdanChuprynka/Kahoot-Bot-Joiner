@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kahoot Bot Control Panel</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>Kahoot Bot Controller</h1>
+      <p class="subtitle">Configure bots, then control answers in real time.</p>
+    </header>
+
+    <!-- STEP 1: CONFIG -->
+    <section id="config-section" class="card">
+      <h2>Step 1: Configuration</h2>
+      <form id="config-form">
+        <div class="form-row">
+          <label for="pin">Game PIN</label>
+          <input type="text" id="pin" name="pin" required />
+        </div>
+
+        <div class="form-row">
+          <label for="botsCount">Number of bots</label>
+          <input
+            type="number"
+            id="botsCount"
+            name="botsCount"
+            min="1"
+            value="10"
+            required
+          />
+        </div>
+
+        <div class="form-row checkbox-row">
+          <label class="label-wrap">
+            <input type="checkbox" id="antibotMode">
+            Enable antibot mode
+            <span class="hint">When antibot is on, random names are forced and some patterns change.</span>
+          </label>
+        </div>
+
+        <div class="form-row checkbox-row" id="randomName-row">
+          <label>
+            <input type="checkbox" id="useRandomNames" />
+            Use random names
+          </label>
+        </div>
+
+        <div class="form-row" id="baseName-row">
+          <label for="baseBotName">Base bot name</label>
+          <input
+            type="text"
+            id="baseBotName"
+            name="baseBotName"
+            placeholder="Bot"
+          />
+          <p class="hint">Bots will be named like "Bot0", "Bot1", ...</p>
+        </div>
+
+        <button id="start-btn" type="submit" disabled>Start Bots</button>
+        <p id="config-error" class="error"></p>
+      </form>
+    </section>
+
+    <!-- STEP 2: STATUS / WAITING -->
+    <section id="status-section" class="card hidden">
+      <h2>Step 2: Bot Status</h2>
+      <p id="status-text">Waiting for bots to join...</p>
+      <div class="status-grid">
+        <div class="status-item">
+          <span class="label">Total bots</span>
+          <span id="status-total" class="value">0</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Joined</span>
+          <span id="status-joined" class="value">0</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Connected</span>
+          <span id="status-connected" class="value">0</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Phase</span>
+          <span id="status-phase" class="value">CONFIG</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3: CONTROL -->
+    <section id="control-section" class="card hidden">
+      <h2>Step 3: Answer Control</h2>
+      <p id="control-hint">
+        When a question is ready, choose one of the options below. All bots will
+        answer with the same choice.
+      </p>
+
+      <div id="answer-buttons" class="answer-grid">
+        <!-- Buttons injected dynamically -->
+      </div>
+
+      <p id="control-status" class="hint"></p>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
